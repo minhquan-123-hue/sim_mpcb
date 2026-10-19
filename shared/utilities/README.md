@@ -1,3 +1,3 @@
-# Utilities
+# Experiments
 
-Small helpers used by more than one simulation go here.
+Small, isolated exercises for learning math, code, and model behavior.
