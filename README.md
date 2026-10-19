@@ -1,2 +1,1 @@
-# math
-inputs => need functions 
+# simulation 
