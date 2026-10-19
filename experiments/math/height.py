@@ -4,5 +4,3 @@ def height(time):
 m = height(0.1)
 
 print(m)
-
-
