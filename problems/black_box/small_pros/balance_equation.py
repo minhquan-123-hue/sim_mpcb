@@ -1,144 +1,100 @@
 """
-Can bang phuong trinh hoa hoc bang cach thu cac he so nguyen duong.
+Can bang phuong trinh hoa hoc bang cach thu cac he so.
 
 Vi du:
     H2 + O2 -> H2O
-    Fe + O2 -> Fe2O3
 
-Ban hoc tap nay ho tro cong thuc don gian (H2O, Fe2O3).
+Chi ho tro cong thuc don gian nhu H2O, Fe2O3.
 Chua ho tro dau ngoac nhu Ca(OH)2.
 """
 
 import re
 from itertools import product
-from math import gcd
-from functools import reduce
 
 
-def parse_formula(formula):
-    """Dem so nguyen tu cua moi nguyen to trong mot cong thuc."""
-    tokens = re.findall(r"([A-Z][a-z]?)(\d*)", formula)
+def dem_nguyen_tu(cong_thuc):
+    """Tra ve so nguyen tu cua moi nguyen to trong mot chat."""
+    tokens = re.findall(r"([A-Z][a-z]?)(\d*)", cong_thuc)
 
-    # Neu regex khong doc het cong thuc, bao loi thay vi am tham bo qua ky tu.
-    if not tokens or "".join(element + number for element, number in tokens) != formula:
-        raise ValueError(f"Cong thuc chua duoc ho tro: {formula}")
+    # Bao dam da doc het cong thuc, khong bo sot ky tu.
+    if not tokens or "".join(a + n for a, n in tokens) != cong_thuc:
+        raise ValueError(f"Cong thuc khong ho tro: {cong_thuc}")
 
     atoms = {}
     for element, number in tokens:
-        count = int(number) if number else 1
-        atoms[element] = atoms.get(element, 0) + count
+        if element not in atoms:
+            atoms[element] = 0
+        atoms[element] += int(number) if number else 1
+
     return atoms
 
 
-def parse_equation(equation):
-    """Tach phuong trinh thanh cac chat o ve trai va ve phai."""
-    if "->" not in equation:
-        raise ValueError("Hay dung dau -> de ngan cach hai ve, vi du: H2 + O2 -> H2O")
+def can_bang(he_so, so_nguyen_tu, so_chat_trai):
+    """Kiem tra so nguyen tu moi nguyen to co bang nhau hai ben khong."""
+    cac_nguyen_to = set()
+    for atoms in so_nguyen_tu:
+        cac_nguyen_to.update(atoms)
 
-    left_text, right_text = equation.split("->", 1)
-    left = [part.strip() for part in left_text.split("+")]
-    right = [part.strip() for part in right_text.split("+")]
-
-    if not all(left) or not all(right):
-        raise ValueError("Thieu chat o mot trong hai ve cua phuong trinh.")
-
-    formulas = left + right
-    atom_counts = [parse_formula(formula) for formula in formulas]
-    return left, right, atom_counts
-
-
-def balanced(coefficients, atom_counts, number_of_reactants):
-    """Kiem tra moi nguyen to co so nguyen tu bang nhau o hai ve khong."""
-    elements = set()
-    for atoms in atom_counts:
-        elements.update(atoms)
-
-    for element in elements:
-        left_total = sum(
-            coefficients[i] * atom_counts[i].get(element, 0)
-            for i in range(number_of_reactants)
+    for element in cac_nguyen_to:
+        trai = sum(
+            he_so[i] * so_nguyen_tu[i].get(element, 0)
+            for i in range(so_chat_trai)
         )
-        right_total = sum(
-            coefficients[i] * atom_counts[i].get(element, 0)
-            for i in range(number_of_reactants, len(coefficients))
+        phai = sum(
+            he_so[i] * so_nguyen_tu[i].get(element, 0)
+            for i in range(so_chat_trai, len(he_so))
         )
-        if left_total != right_total:
+
+        if trai != phai:
             return False
+
     return True
 
 
-def balance_equation(equation, max_coefficient=12):
-    """
-    Tim bo he so nguyen duong co tong nho nhat.
-    Day la cach thu he so de hoc, khong phai thuat toan toi uu cho phuong trinh lon.
-    """
-    left, right, atom_counts = parse_equation(equation)
-    number_of_reactants = len(left)
-    number_of_compounds = len(atom_counts)
+def can_bang_phuong_trinh(phuong_trinh):
+    trai_text, phai_text = phuong_trinh.split("->")
+    trai = [chat.strip() for chat in trai_text.split("+")]
+    phai = [chat.strip() for chat in phai_text.split("+")]
 
-    best = None
-    best_sum = None
+    cac_chat = trai + phai
+    so_nguyen_tu = [dem_nguyen_tu(chat) for chat in cac_chat]
 
-    # Thu cac he so 1, 2, ..., max_coefficient.
-    # Chon bo he so can bang co tong nho nhat.
-    for coefficients in product(range(1, max_coefficient + 1), repeat=number_of_compounds):
-        if best_sum is not None and sum(coefficients) >= best_sum:
-            continue
+    # Thu cac bo he so: (1, 1, 1), (1, 1, 2), ...
+    # Giu lai bo he so hop le co tong nho nhat.
+    he_so_tot_nhat = None
 
-        # Bo he so toi gian khong duoc co uoc chung lon hon 1.
-        if reduce(gcd, coefficients) != 1:
-            continue
+    for he_so in product(range(1, 9), repeat=len(cac_chat)):
+        if he_so_tot_nhat is not None:
+            if sum(he_so) >= sum(he_so_tot_nhat):
+                continue
 
-        if balanced(coefficients, atom_counts, number_of_reactants):
-            best = coefficients
-            best_sum = sum(coefficients)
+        if can_bang(he_so, so_nguyen_tu, len(trai)):
+            he_so_tot_nhat = he_so
 
-    if best is None:
-        raise ValueError(
-            "Chua tim thay he so. Hay thu tang max_coefficient "
-            "hoac kiem tra lai phuong trinh."
-        )
+    if he_so_tot_nhat is None:
+        raise ValueError("Khong tim thay he so. Hay kiem tra phuong trinh.")
 
-    left_result = " + ".join(
-        f"{best[i]} {left[i]}" if best[i] != 1 else left[i]
-        for i in range(len(left))
-    )
-    right_result = " + ".join(
-        f"{best[number_of_reactants + i]} {right[i]}"
-        if best[number_of_reactants + i] != 1
-        else right[i]
-        for i in range(len(right))
-    )
+    trai_kq = []
+    for i, chat in enumerate(trai):
+        if he_so_tot_nhat[i] == 1:
+            trai_kq.append(chat)
+        else:
+            trai_kq.append(str(he_so_tot_nhat[i]) + chat)
 
-    return f"{left_result} -> {right_result}", best, atom_counts, number_of_reactants
+    phai_kq = []
+    for i, chat in enumerate(phai):
+        he_so = he_so_tot_nhat[len(trai) + i]
+        if he_so == 1:
+            phai_kq.append(chat)
+        else:
+            phai_kq.append(str(he_so) + chat)
+
+    return " + ".join(trai_kq) + " -> " + " + ".join(phai_kq)
 
 
-def main():
-    equation = input("Nhap phuong trinh (vi du: H2 + O2 -> H2O): ")
+phuong_trinh = input("Nhap phuong trinh, vi du H2 + O2 -> H2O: ")
 
-    try:
-        result, coefficients, atom_counts, number_of_reactants = balance_equation(equation)
-    except ValueError as error:
-        print("Loi:", error)
-        return
-
-    print("\nPhuong trinh da can bang:")
-    print(result)
-
-    print("\nHe so theo thu tu cac chat:", coefficients)
-    print("\nKiem tra so nguyen tu:")
-    elements = sorted({element for atoms in atom_counts for element in atoms})
-    for element in elements:
-        left_total = sum(
-            coefficients[i] * atom_counts[i].get(element, 0)
-            for i in range(number_of_reactants)
-        )
-        right_total = sum(
-            coefficients[i] * atom_counts[i].get(element, 0)
-            for i in range(number_of_reactants, len(coefficients))
-        )
-        print(f"{element}: ve trai = {left_total}, ve phai = {right_total}")
-
-
-if __name__ == "__main__":
-    main()
+try:
+    print("Phuong trinh da can bang:", can_bang_phuong_trinh(phuong_trinh))
+except ValueError as loi:
+    print("Loi:", loi)
