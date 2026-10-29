@@ -2,15 +2,21 @@
 
 from math import log
 
-k = 0.05  # ngay^-1
-initial_concentration = 80  # mg/L
-target_concentration = 10  # mg/L
+k = 0.05 #ngay^-1
+Co = 80 #mg/L
+Ct = 10 #mg/L
 
-half_life = log(2) / k
-time_to_target = log(initial_concentration / target_concentration) / k
+# tinh chu ky ban ra
+# neu khong dung cong thuc nay se phai tinh ra so mol da bi phan huy
+# sau lay so mol con lai de thuc hien tinh tiep so mol bi phan huy
+# 80*0.05 + (80-4)*0.05 + (80-4-3.8)*0.05 + (80-4-3.8-3.61)*0.05 + (80-4-3.8-3.61-3.43)*0.05 + (80-4-3.8-3.61-3.43-3.25)*0.05 + (80-4-3.8-3.61-3.43-3.25-3.08)*0.05 + (80-4-3.8-3.61-3.43-3.25-3.08-2.91)*0.05 + (80-4-3.8-3.61-3.43-3.25-3.08-2.91-2.75)*0.05 + (80-4-3.8-3.61-3.43-3.25-3.08-2.91-2.75 - 2,59)*0,05 
+# va sau do moi ra duoc so ngay bang cach dem chay
+t_half = log(2) / k
+print("Chu ky ban ra cua dong hoc bac 1 la: ", t_half, "ngay")
 
-print(f"Chu ky ban ra: {half_life:.2f} ngay")
-print(
-    f"Thoi gian de nong do giam tu {initial_concentration:g} xuong "
-    f"{target_concentration:g} mg/L: {time_to_target:.2f} ngay"
-)
+# tinh thoi gian suy giam nong do
+t = 1
+# Ct = Co * (log(2) ** (-k * t))
+# log(Ct / Co) = -k * t
+t = log(Ct / Co) / (-k)
+print("Thoi gian suy giam nong do tu", Co, "mg/L den", Ct, "mg/L la: ", t, "ngay")
