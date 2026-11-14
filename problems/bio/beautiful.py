@@ -1,7 +1,10 @@
-def thought(is_woman):
-    if is_woman == True:
-        return 1
+P_H = True
 
-while(True):
-    P_H = True
-    thought(P_H)
+def thought(is_woman):
+    if is_woman == 1:
+        P_H = True
+    return P_H
+
+while(P_H):
+    is_woman = 1
+    thought(is_woman)
