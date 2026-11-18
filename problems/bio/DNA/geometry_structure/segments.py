@@ -14,7 +14,7 @@ N_both = 2000
 #Seg X
 A = 600
 T = A
-G = 2000 - A+T
+G = (N_both - (A+T)) / 2
 C = G
 
 H_bond_seg_X = A * 2 + G * 3
@@ -23,7 +23,7 @@ print(H_bond_seg_X)
 #Seg Y
 G = 700
 C = G
-A = 2000 - G+C
+A = (N_both - (G+C)) / 2
 T = A
 
 H_bond_seg_Y = A * 2 + G * 3
