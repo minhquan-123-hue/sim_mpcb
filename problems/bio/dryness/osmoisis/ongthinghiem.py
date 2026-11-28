@@ -26,7 +26,7 @@ print("khối lượng dung dịch về sau: " , mass_of_solution_after)
 mass_of_solution_loss = mass_of_solution - mass_of_solution_after
 print("khối lượng dung dịch bị mất đi là: ", mass_of_solution_loss)
 
-
+#If the waters, if the s    se their waters, it  die. S  basiy this pr  em, s exercise, sh  ws us that if the water hasess, n   , the c ncentrati   n, c    ncentrati   n   f the sute inside the water, Less than...ess than...The environment surrouin     it is well, basically the water inse the cells will move out to the environment.
 
 
 
